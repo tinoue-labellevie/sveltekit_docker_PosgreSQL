@@ -1,0 +1,23 @@
+# docker-compose.yml (my-fullstack-app ディレクトリ直下)
+version: "3.8"
+
+services:
+  db: # データベースサービスの名前。NestJS の DB_HOST で参照します。
+    image: postgres:14 # 使用する PostgreSQL イメージのバージョン
+    container_name: my-postgres-container # コンテナ名 (任意)
+    environment: # 環境変数で DB 接続情報を設定
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${PG_PORT}:5432" # ホストOSのポート:コンテナのポート。ホストOSからアクセスする場合に使用。
+    volumes:
+      - pg_data:/var/lib/postgresql/data # データを永続化するためのボリューム
+    healthcheck: # DBが起動したか確認するためのヘルスチェック
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pg_data: # ボリューム定義
